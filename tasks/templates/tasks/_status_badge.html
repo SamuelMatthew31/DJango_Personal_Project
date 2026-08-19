@@ -1,0 +1,20 @@
+{% comment %}
+Partial ini dipakai dua kali: render awal di task_list/task_detail,
+dan sebagai target hx-swap saat status task diganti lewat dropdown.
+{% endcomment %}
+<span id="status-badge-{{ task.id }}"
+      class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] font-medium uppercase tracking-wider
+      {% if task.status == 'TODO' %}
+        border-slate-300 bg-slate-100 text-slate-600
+      {% elif task.status == 'IN_PROGRESS' %}
+        border-[#D9A441]/40 bg-[#D9A441]/10 text-[#8A6A1F]
+      {% else %}
+        border-[#0C8F87]/40 bg-[#0C8F87]/10 text-[#0A6F68]
+      {% endif %}">
+  <span class="h-1.5 w-1.5 rounded-full
+    {% if task.status == 'TODO' %}bg-slate-400
+    {% elif task.status == 'IN_PROGRESS' %}bg-[#D9A441]
+    {% else %}bg-[#0C8F87]{% endif %}">
+  </span>
+  {{ task.get_status_display }}
+</span>

@@ -1,21 +1,34 @@
 from django.db import models
+from django.urls import reverse
 
-# Create your models here.
 class Task(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    status_choices = (
-        (1, 'To Do'),
-        (2, 'In Progress'),
-        (3, 'Completed'),
+    class Status(models.TextChoices):
+        TODO = "TODO", "To Do"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        COMPLETED = "COMPLETED", "Completed"
+
+    class Priority(models.TextChoices):
+        LOW = "LOW", "Low"
+        MEDIUM = "MEDIUM", "Medium"
+        HIGH = "HIGH", "High"
+
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.TODO
     )
-    priority_choices = (
-        (1, 'Low'),
-        (2, 'Medium'),
-        (3, 'High'),
+    priority = models.CharField(
+        max_length=10, choices=Priority.choices, default=Priority.MEDIUM
     )
-    status = models.IntegerField(choices=status_choices)
-    priority = models.IntegerField(choices=priority_choices)
-    due_date = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse("tasks:task_detail", args=[self.pk])

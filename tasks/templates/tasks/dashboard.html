@@ -1,0 +1,66 @@
+{% extends "tasks/base.html" %}
+
+{% block title %}Dashboard · Task Panel{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}
+  <p class="font-mono text-xs text-slate-400 mt-0.5">Ringkasan status seluruh task kamu</p>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="font-mono text-[10px] uppercase tracking-widest text-slate-400">Total Tasks</p>
+      <p class="font-display mt-2 text-3xl font-semibold text-[#12161C]">{{ total }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-l-4 border-l-slate-400">
+      <p class="font-mono text-[10px] uppercase tracking-widest text-slate-400">To Do</p>
+      <p class="font-display mt-2 text-3xl font-semibold text-[#12161C]">{{ todo_count }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-l-4 border-l-[#D9A441]">
+      <p class="font-mono text-[10px] uppercase tracking-widest text-slate-400">In Progress</p>
+      <p class="font-display mt-2 text-3xl font-semibold text-[#12161C]">{{ in_progress_count }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-l-4 border-l-[#0C8F87]">
+      <p class="font-mono text-[10px] uppercase tracking-widest text-slate-400">Completed</p>
+      <p class="font-display mt-2 text-3xl font-semibold text-[#12161C]">{{ completed_count }}</p>
+    </div>
+  </div>
+
+  <!-- Upcoming tasks -->
+  <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+      <h2 class="font-display text-sm font-semibold text-[#12161C]">Upcoming Tasks</h2>
+      <a href="{% url 'tasks:task_list' %}" class="font-mono text-xs text-[#0C8F87] hover:text-[#0A6F68]">View all →</a>
+    </div>
+
+    {% if upcoming %}
+      <ul class="divide-y divide-slate-100">
+        {% for task in upcoming %}
+          <li class="flex items-center gap-4 px-5 py-3.5 border-l-4
+              {% if task.priority == 'HIGH' %}border-l-[#DC4C3F]
+              {% elif task.priority == 'MEDIUM' %}border-l-[#D9A441]
+              {% else %}border-l-[#6B93B0]{% endif %}">
+            <a href="{% url 'tasks:task_detail' task.pk %}" class="flex-1 min-w-0">
+              <p class="truncate text-sm font-medium text-[#12161C] hover:text-[#0C8F87]">{{ task.title }}</p>
+              <p class="font-mono text-xs text-slate-400 mt-0.5">
+                {% if task.due_date %}Due {{ task.due_date|date:"d M Y" }}{% else %}No due date{% endif %}
+              </p>
+            </a>
+            {% include "tasks/_status_badge.html" %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="px-5 py-10 text-center">
+        <p class="text-sm text-slate-500">Belum ada task yang perlu dikerjakan. Semua beres, atau saatnya bikin task baru.</p>
+        <a href="{% url 'tasks:task_create' %}" class="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#0C8F87] px-4 py-2 text-sm font-medium text-white hover:bg-[#0A6F68]">
+          Tambah Task
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

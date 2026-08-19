@@ -1,0 +1,71 @@
+{% load static %}
+<div id="task-list-container" class="space-y-3">
+
+  {% if page_obj %}
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100 overflow-hidden">
+      {% for task in page_obj %}
+        <div class="flex items-center gap-4 px-5 py-4 border-l-4 transition hover:bg-slate-50
+            {% if task.priority == 'HIGH' %}border-l-[#DC4C3F]
+            {% elif task.priority == 'MEDIUM' %}border-l-[#D9A441]
+            {% else %}border-l-[#6B93B0]{% endif %}">
+
+          <a href="{% url 'tasks:task_detail' task.pk %}" class="flex-1 min-w-0">
+            <p class="truncate text-sm font-medium text-[#12161C] hover:text-[#0C8F87]">{{ task.title }}</p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-slate-400">
+              <span>{% if task.due_date %}Due {{ task.due_date|date:"d M Y" }}{% else %}No due date{% endif %}</span>
+              <span class="text-slate-300">·</span>
+              <span>{{ task.get_priority_display }} priority</span>
+            </div>
+          </a>
+
+          <!-- Quick status change -->
+          <select
+            name="status"
+            hx-post="{% url 'tasks:task_update_status' task.pk %}"
+            hx-trigger="change"
+            hx-target="#status-badge-{{ task.id }}"
+            hx-swap="outerHTML"
+            class="hidden sm:block rounded-lg border border-slate-200 bg-white py-1.5 pl-2 pr-7 font-mono text-xs text-slate-600 focus:border-[#0C8F87] focus:outline-none"
+          >
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+
+          {% include "tasks/_status_badge.html" %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="flex items-center justify-between font-mono text-xs text-slate-500 px-1">
+        <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+        <div class="flex gap-2">
+          {% if page_obj.has_previous %}
+            <button
+              hx-get="{% url 'tasks:task_list' %}?q={{ query }}&status={{ status }}&priority={{ priority }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}"
+              hx-target="#task-list-container" hx-swap="outerHTML" hx-push-url="true"
+              class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">
+              ← Prev
+            </button>
+          {% endif %}
+          {% if page_obj.has_next %}
+            <button
+              hx-get="{% url 'tasks:task_list' %}?q={{ query }}&status={{ status }}&priority={{ priority }}&sort={{ sort }}&page={{ page_obj.next_page_number }}"
+              hx-target="#task-list-container" hx-swap="outerHTML" hx-push-url="true"
+              class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-50">
+              Next →
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+      <p class="text-sm font-medium text-[#12161C]">Tidak ada task yang cocok</p>
+      <p class="mt-1 text-sm text-slate-500">Coba ubah kata kunci pencarian atau filter yang dipakai.</p>
+    </div>
+  {% endif %}
+</div>
